@@ -1,0 +1,120 @@
+// BookingForm.tsx
+'use client'
+
+import * as React from 'react'
+import { format, addDays } from 'date-fns'
+import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+
+export function BookingForm() {
+  const [name, setName] = React.useState('')
+  const [phone, setPhone] = React.useState('')
+  const [email, setEmail] = React.useState('')
+  const [rentalStart, setRentalStart] = React.useState<Date | null>(null)
+  const [rentalEnd, setRentalEnd] = React.useState<Date | null>(null)
+  const [errors, setErrors] = React.useState<{ [key: string]: string }>({})
+
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {}
+    if (!name.trim()) newErrors.name = 'Name is required'
+    if (!phone.trim()) newErrors.phone = 'Phone number is required'
+    if (!rentalStart) newErrors.rentalStart = 'Rental start date is required'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return
+    setRentalStart(date)
+    setRentalEnd(addDays(date, 6))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+
+    const payload = {
+      name,
+      phone,
+      email,
+      rentalStart,
+      rentalEnd
+    }
+
+    console.log('Form Submitted:', payload)
+    // Place your API call or state handling logic here
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto px-4 py-6">
+      <div>
+        <Label htmlFor="name">Name</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your name"
+        />
+        {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Enter your phone number"
+        />
+        {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email (Optional)</Label>
+        <Input
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="rental-date">Rental Start Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !rentalStart && "text-muted-foreground"
+              )}
+            >
+              {rentalStart ? format(rentalStart, "PPP") : "Pick a date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={rentalStart ?? undefined}
+              onSelect={handleDateSelect}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+        {errors.rentalStart && <p className="text-sm text-red-500 mt-1">{errors.rentalStart}</p>}
+        {rentalEnd && (
+          <p className="text-sm text-muted-foreground mt-1">
+            Rental window: <strong>{format(rentalStart!, "MMM d")} → {format(rentalEnd, "MMM d")}</strong>
+          </p>
+        )}
+      </div>
+
+      <Button type="submit" className="w-full">Submit Booking</Button>
+    </form>
+  )
+}
