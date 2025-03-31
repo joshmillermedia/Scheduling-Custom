@@ -1,0 +1,12 @@
+export default function InventoryGrid({ formData }) {
+  return (
+    <div>
+      <p>Showing inventory for: <strong>{formData.date}</strong></p>
+      {/* Replace with your Supabase logic */}
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <button className="p-4 border">Vintage Black Deluxe</button>
+        <button className="p-4 border">Vintage White Classic</button>
+      </div>
+    </div>
+  );
+}
